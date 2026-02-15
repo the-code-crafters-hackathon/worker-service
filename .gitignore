@@ -1,0 +1,11 @@
+**/.env
+**/.env.local
+**/__pycache__/
+**/.pytest_cache/
+**/htmlcov/
+**/outputs/
+**/temp/
+**/uploads/
+**/.python-version
+**/.venv/
+**/venv/
