@@ -1,0 +1,6 @@
+boto3
+sqlalchemy
+python-dotenv
+psycopg2-binary
+pytest
+pytest-cov

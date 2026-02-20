@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-worker
+  namespace: app
+  labels:
+    app: video-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: video-worker
+  template:
+    metadata:
+      labels:
+        app: video-worker
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      serviceAccountName: lanchonete-app-sa
+      containers:
+        - name: video-worker
+          image: "${IMAGE_URI}"
+          imagePullPolicy: Always
+          command: ["python", "worker.py"]
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+              ephemeral-storage: "512Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+              ephemeral-storage: "1Gi"
+          env:
+            - name: APP_ENV
+              value: "production"
+            - name: DB_SECRET_NAME
+              value: "gb/dev/rds/postgres"
+            - name: AWS_REGION
+              value: "us-east-1"
+            - name: SQS_VIDEO_PROCESSING_QUEUE
+              value: "https://sqs.us-east-1.amazonaws.com/000000000000/video-processing-queue"

@@ -1,7 +1,10 @@
 **/.env
 **/.env.local
+**/.env.smoke
 **/__pycache__/
 **/.pytest_cache/
+**/.coverage
+**/coverage.xml
 **/htmlcov/
 **/outputs/
 **/temp/
@@ -9,3 +12,4 @@
 **/.python-version
 **/.venv/
 **/venv/
+**/*.db
