@@ -47,7 +47,6 @@ jobs:
   sonar_main:
     name: SonarCloud (main)
     runs-on: ubuntu-latest
-    needs: quality-gate
     permissions:
       contents: read
     env:
@@ -94,6 +93,11 @@ jobs:
       - name: SonarCloud Scan
         if: ${{ env.SONAR_TOKEN != '' }}
         uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          args: >
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.sources=app
+            -Dsonar.tests=tests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
