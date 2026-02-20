@@ -2,14 +2,15 @@ FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
-# Install FFmpeg
 RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 
-COPY ./config/requirements.txt ./requirements.txt
+COPY .docker/bin/config/requirements.txt ./requirements.txt
 
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt
 
-COPY . .
+COPY app ./app
+COPY tests ./tests
+COPY worker.py ./worker.py
 
 CMD ["python", "worker.py"]

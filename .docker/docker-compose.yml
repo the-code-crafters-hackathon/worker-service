@@ -7,8 +7,8 @@ services:
     volumes:
       - ../:/app
     env_file:
-      - .env
-    command: python worker.py
+      - ${WORKER_ENV_FILE:-.env}
+    command: ["python", "worker.py"]
     networks:
       - video-upload-network
     logging:

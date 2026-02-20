@@ -28,8 +28,6 @@ class VideoProcessingGateway:
                 zipf.write(f, arcname=f.name)
 
     def process_video(self, video_path: str, timestamp: str, fps: int = 1) -> Tuple[Path, int, List[str]]:
-        video_path_obj = Path(video_path)
-        
         proc_temp = self.temp_dir / timestamp
         proc_temp.mkdir(parents=True, exist_ok=True)
 
@@ -53,12 +51,12 @@ class VideoProcessingGateway:
                 shutil.rmtree(proc_temp)
             except Exception:
                 pass
-            raise Exception(f"FFmpeg error: {result.stderr}")
+            raise RuntimeError(f"FFmpeg error: {result.stderr}")
 
         frames = sorted(proc_temp.glob("*.png"))
         if not frames:
             shutil.rmtree(proc_temp)
-            raise Exception("Nenhum frame extraído do vídeo")
+            raise RuntimeError("Nenhum frame extraído do vídeo")
 
         zip_filename = f"frames_{timestamp}.zip"
         zip_path = self.outputs_dir / zip_filename
@@ -79,7 +77,7 @@ class VideoProcessingGateway:
                 pass
 
             if not uploaded:
-                raise Exception("Falha ao enviar ZIP para o S3")
+                raise RuntimeError("Falha ao enviar ZIP para o S3")
 
             s3_uri = f"s3://{s3.bucket_name}/{s3_key}"
             return s3_uri, len(frames), image_names
