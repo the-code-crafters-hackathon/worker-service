@@ -115,6 +115,7 @@ jobs:
     env:
       AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
       AWS_IAM_ROLE_ARN: ${{ vars.AWS_IAM_ROLE_ARN }}
+      ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY || 'processor-service' }}
       ECS_CLUSTER_NAME: ${{ vars.ECS_CLUSTER_NAME || 'hackathon-cluster' }}
       ECS_TASK_FAMILY: ${{ vars.ECS_TASK_FAMILY || 'hackathon-processor' }}
       ECS_SERVICE_NAME: ${{ vars.ECS_SERVICE_NAME || 'hackathon-processor' }}
@@ -140,12 +141,10 @@ jobs:
 
       - name: Build e push da imagem
         id: image
-        env:
-          REPO_NAME: ${{ github.event.repository.name }}
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-          IMAGE_URI="${REGISTRY}/${REPO_NAME}:${GITHUB_SHA}"
+          IMAGE_URI="${REGISTRY}/${ECR_REPOSITORY}:${GITHUB_SHA}"
 
           echo "IMAGE_URI=${IMAGE_URI}" >> "$GITHUB_OUTPUT"
 
