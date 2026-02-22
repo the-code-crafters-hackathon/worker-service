@@ -6,6 +6,7 @@ from app.infrastructure.queue.sqs_consumer import SQSConsumer
 from app.dao.video_dao import VideoDAO
 from app.gateways.video_processing_gateway import VideoProcessingGateway
 from app.gateways.s3_gateway import S3Gateway
+from app.gateways.notification_gateway import NotificationGateway
 from app.use_cases.process_video_use_case import ProcessVideoUseCase
 
 logging.basicConfig(
@@ -23,6 +24,7 @@ class VideoWorker:
         self.uploads_dir.mkdir(parents=True, exist_ok=True)
         self.processing_gateway = VideoProcessingGateway(base_dir=self.base_dir)
         self.s3_gateway = S3Gateway(base_dir=self.base_dir)
+        self.notification_gateway = NotificationGateway()
 
     @staticmethod
     def _extract_s3_key(video_path: str, explicit_s3_key: Optional[str] = None) -> Optional[str]:
@@ -81,7 +83,8 @@ class VideoWorker:
             use_case = ProcessVideoUseCase(
                 processing_gateway=self.processing_gateway,
                 video_dao=video_dao,
-                s3_gateway=self.s3_gateway
+                s3_gateway=self.s3_gateway,
+                notification_gateway=self.notification_gateway,
             )
 
             use_case.execute(
