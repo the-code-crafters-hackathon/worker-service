@@ -1,6 +1,7 @@
 import logging
 from app.gateways.video_processing_gateway import VideoProcessingGateway
 from app.gateways.s3_gateway import S3Gateway
+from app.gateways.notification_gateway import NotificationGateway
 from app.dao.video_dao import VideoDAO
 
 logger = logging.getLogger(__name__)
@@ -12,16 +13,18 @@ class ProcessVideoUseCase:
         processing_gateway: VideoProcessingGateway,
         video_dao: VideoDAO,
         s3_gateway: S3Gateway = None,
+        notification_gateway: NotificationGateway = None,
     ):
         self.processing_gateway = processing_gateway
         self.s3_gateway = s3_gateway
         self.video_dao = video_dao
+        self.notification_gateway = notification_gateway
 
     def execute(self, video_id: int, video_path: str, timestamp: str):
         try:
             logger.info(f"Iniciando processamento do vídeo {video_id}")
 
-            zip_path, frame_count, images = self.processing_gateway.process_video(
+            zip_path, frame_count, _ = self.processing_gateway.process_video(
                 video_path, timestamp
             )
             logger.info(
@@ -42,3 +45,21 @@ class ProcessVideoUseCase:
                 logger.info(f"Vídeo {video_id} status atualizado para 2 (erro).")
             except Exception as update_error:
                 logger.error(f"Erro ao atualizar status do vídeo {video_id}: {str(update_error)}")
+
+            if self.notification_gateway:
+                user_id = None
+                try:
+                    video = self.video_dao.get_video_by_id(video_id)
+                    if video and getattr(video, "user_id", None) is not None:
+                        user_id = int(video.user_id)
+                except Exception:
+                    logger.warning("Não foi possível obter user_id para notificação", exc_info=True)
+
+                try:
+                    self.notification_gateway.notify_processing_error(
+                        video_id=video_id,
+                        error_message=str(e),
+                        user_id=user_id,
+                    )
+                except Exception:
+                    logger.warning("Falha ao enviar notificação de erro", exc_info=True)
